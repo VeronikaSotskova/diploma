@@ -1,0 +1,75 @@
+{
+  "name": "main",
+  "children": [
+    {
+      "id": 1,
+      "name": "Finance",
+      "description": null,
+      "children": [
+        {
+          "id": 1,
+          "name": "internal_transactions",
+          "business_name": "Internal transactions in a company",
+          "value": 10
+        },
+        {
+          "id": 2,
+          "name": "internal_transactions_year2020",
+          "business_name": "Internal transactions in a company for 2020",
+          "value": 10
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Client",
+      "description": null,
+      "children": [
+        {
+          "id": 3,
+          "name": "clients",
+          "business_name": "External clients",
+          "value": 10
+        },
+        {
+          "id": 4,
+          "name": "internal_clients",
+          "business_name": "Internal clients",
+          "value": 10
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Account",
+      "description": null,
+      "children": [
+        {
+          "id": 5,
+          "name": "accounts",
+          "business_name": "Client accounts",
+          "value": 10
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Transaction",
+      "description": null,
+      "children": [
+        {
+          "id": 6,
+          "name": "tx",
+          "business_name": "internal tx for clients",
+          "value": 10
+        },
+        {
+          "id": 7,
+          "name": "external_tx",
+          "business_name": "external tx for clients",
+          "value": 10
+        }
+      ]
+    }
+  ]
+}
