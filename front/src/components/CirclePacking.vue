@@ -1,7 +1,6 @@
 <template lang="pug">
 h3(v-if="pathNodes") Path: {{ pathNodes }}
-
-svg(:height="height" :width="width")
+svg(:height="height" :width="width" style="transition: 0.1s ease-in")
   g
     circle(
       v-if="rootNode.data"
@@ -51,10 +50,9 @@ export default {
   data() {
     return {
       rootNode: {},
-      prevNodeId: null,
       depth: 0,
-      path: []
-
+      path: [],
+      pathId: []
     }
   },
   computed: {
@@ -81,7 +79,7 @@ export default {
     click(nod) {
       if (nod.data.has_children) {
         this.$store.dispatch("business_domains/getDomains", {id: nod.data.id}).then((data) => {
-          this.prevNodeId = this.rootNode.data.id
+          this.pathId.push(this.rootNode.data.id)
           this.rootNode = this.pack(data)
           this.depth += 1
           this.path.push(this.rootNode.data.name)
@@ -90,16 +88,13 @@ export default {
     },
     clickBehind() {
       if (this.depth > 1) {
-        this.$store.dispatch("business_domains/getDomains", {id: this.prevNodeId}).then((data) => {
+        this.$store.dispatch("business_domains/getDomains", {id: this.pathId.pop()}).then((data) => {
           this.rootNode = this.pack(data)
-          this.prevNodeId = this.rootNode.data.id
           this.depth -= 1
-
         });
       } else {
         this.$store.dispatch("business_domains/getDomains").then((data) => {
           this.rootNode = this.pack(data)
-          this.prevNodeId = null
           this.depth -= 1
         });
       }
@@ -119,5 +114,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>
