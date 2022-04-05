@@ -1,20 +1,18 @@
 <template lang="pug">
-NewCircles
+CirclePacking
 </template>
 
 <script>
-
-import NewCircles from "@/components/CirclePacking";
-
+import CirclePacking from "@/components/CirclePacking";
 export default {
   name: 'App',
   components: {
-    NewCircles
+    CirclePacking
   }
 }
 </script>
 
-<style lang="scss">
+<style>
 @font-face {
   font-style: normal;
   font-weight: 400;
@@ -24,8 +22,6 @@ export default {
     url("assets/fonts/montserrat-regular.woff2") format("woff2"),
     url("assets/fonts/montserrat-regular.woff") format("woff");
 }
-
-
 @font-face {
   font-style: normal;
   font-weight: 500;
@@ -35,7 +31,6 @@ export default {
     url("assets/fonts/montserrat-medium.woff2") format("woff2"),
     url("assets/fonts/montserrat-medium.woff") format("woff");
 }
-
 @font-face {
   font-style: normal;
   font-weight: 600;
@@ -45,7 +40,6 @@ export default {
     url("assets/fonts/montserrat-semibold.woff2") format("woff2"),
     url("assets/fonts/montserrat-semibold.woff") format("woff");
 }
-
 @font-face {
   font-style: normal;
   font-weight: 700;
@@ -55,7 +49,6 @@ export default {
     url("assets/fonts/montserrat-bold.woff2") format("woff2"),
     url("assets/fonts/montserrat-bold.woff") format("woff");
 }
-
 #app {
   font-family: "Montserrat", "Arial", sans-serif;
   -webkit-font-smoothing: antialiased;

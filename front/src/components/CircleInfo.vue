@@ -3,23 +3,25 @@ foreignObject(
     :x="rectangleArea.x"
     :y="rectangleArea.y"
     :width="rectangleArea.width"
-    :height="isClicked ? rectangleArea.height : (rectangleArea.height-marginDiv)/4"
+    height="1"
 )
+  GDialog(v-model="dialogState" max-width="500px" scrollable)
+    .wrapper
+      .content
+        .title {{ circle.data.name }}
+        p {{ circle.data.description || circle.data.business_name }}
+      .actions.max
+        button(class="btn btn-outline-dark" @click="dialogState = false") Close
   div(
-    :style="{width: `${rectangleArea.width}px`, maxHeight:`${(rectangleArea.height-marginDiv)/4}px`}"
+    :style="{width: `${rectangleArea.width}px`, maxHeight:`${rectangleArea.height/2}px`}"
     class="circleTitle btn btn-secondary card-title"
-    @click="show"
+    @click="dialogState = true"
+    xmlns="http://www.w3.org/2000/xmlns/"
   )
     p(
       class="circleTitleText"
+      :style="{fontSize: fontSizeTitle}"
     ) {{ circle.data.name }}
-  div(
-    v-if="isClicked && (circle.data.description || circle.data.business_name)"
-    :style="{width: `${rectangleArea.width}px`, maxHeight: `${(rectangleArea.height-marginDiv)/4 * 3}px`}"
-    class="circleDescription card-body"
-    @click="isClicked=false"
-  )
-    p(class="card-text") {{ circle.data.description || circle.data.business_name }}
 </template>
 
 <script>
@@ -30,19 +32,59 @@ export default {
   },
   data() {
     return {
-      isClicked: false,
-      marginDiv: 10,
+      dialogState: false,
     }
   },
   computed: {
     rectangleArea() {
       return this.getRect(this.circle)
+    },
+    fontSizeTitle() {
+      if (this.rectangleArea.width < 35) {
+        return "0.6vmin";
+      } else if (this.rectangleArea.width < 40) {
+        return "0.7vmin";
+      } else if (this.rectangleArea.height < 45) {
+        return "0.8vmin"
+      } else if (this.rectangleArea.height < 49){
+        return "0.9vmin"
+      } else if (this.rectangleArea.height < 54){
+        return "1vmin"
+      } else if (this.rectangleArea.height < 59){
+        return "1.1vmin"
+      } else if (this.rectangleArea.height < 63){
+        return "1.2vmin"
+      } else if (this.rectangleArea.height < 68){
+        return "1.3vmin"
+      } else if (this.rectangleArea.height < 73){
+        return "1.4vmin"
+      } else if (this.rectangleArea.height < 77){
+        return "1.5vmin"
+      } else if (this.rectangleArea.height < 82){
+        return "1.6vmin"
+      } else if (this.rectangleArea.height < 87){
+        return "1.7vmin"
+      } else if (this.rectangleArea.height < 91){
+        return "1.8vmin"
+      } else if (this.rectangleArea.height < 96){
+        return "1.9vmin"
+      } else if (this.rectangleArea.height < 101){
+        return "2vmin"
+      } else if (this.rectangleArea.height < 105){
+        return "2.1vmin"
+      } else if (this.rectangleArea.height < 110){
+        return "2.2vmin"
+      } else if (this.rectangleArea.height < 115){
+        return "2.3vmin"
+      } else if (this.rectangleArea.height < 119){
+        return "2.4vmin"
+      } else {
+        return "2.5vmin"
+      }
+
     }
   },
   methods: {
-    show() {
-      this.isClicked = !this.isClicked
-    },
     getRect(c) {
       const angle = 90
       const angX = (180 - angle) / 2 * 3 + angle
@@ -65,17 +107,47 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style scoped>
+
+.wrapper {
+  color: #000;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.content {
+  padding: 20px;
+  white-space: pre-wrap;
+  word-break:break-all;
+  overflow: auto;
+}
+
+.title {
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.actions {
+  padding: 10px 20px;
+  border-top: 1px solid rgb(179, 179, 179);
+  display: block;
+}
+/* Растягиваем второй блок на максимальнуцю ширину */
+.actions.max {
+  flex: 1;
+}
+
 .circleTitleText {
   text-align: center;
   margin: 0;
   padding: 0;
+  font-size: 2vmin;
 }
 
 .circleTitle {
-  font-size: 15px;
   font-weight: 600;
-  //line-height: 20px;
   text-align:center;
   white-space: pre-wrap;
   display: block;
@@ -83,53 +155,19 @@ export default {
   overflow-x: hidden;
   word-break:break-all;
   -webkit-overflow-scrolling: touch;
+  padding: 0;
+  margin: 0;
+  -ms-overflow-style: none;
+  position: fixed;
 }
 
-/*.circleTitle:hover {*/
-/*    outline: 2px solid #000; !* Чёрная рамка *!*/
-/*}*/
-
-.circleDescription {
-  font-size: 12px;
-  background: white;
-  //line-height: 20px;
-  text-align:center;
-  color: black;
-  //white-space: pre-wrap;
-  overflow-y: auto;
-  overflow-x: hidden;
-  margin-top: 10px;
-  //word-break:break-all;
-  -webkit-overflow-scrolling: touch;
+.circleTitle::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
-
-//.circleDescription::-webkit-scrollbar, .circleTitle::-webkit-scrollbar {
-//  width: 10px;
-//  background-color: #f9f9fd;
-//}
-.circleDescription, .circleTitle {
-      overflow: auto;
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-}
-
-.circleDescription::-webkit-scrollbar, .circleTitle::-webkit-scrollbar {
-      width: 0;
-      height: 0;
-}
-
-//.circleDescription::-webkit-scrollbar-thumb, .circleTitle::-webkit-scrollbar-thumb {
-//  border-radius: 10px;
-//  background-color: #505a5a;
-//}
-//
-//.circleDescription::-webkit-scrollbar-track, .circleTitle::-webkit-scrollbar-track {
-//  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.2);
-//  border-radius: 10px;
-//  background-color: #f9f9fd;
-//}
 
 foreignObject {
   transition: 0.4s linear;
+  overflow: visible;
 }
 </style>

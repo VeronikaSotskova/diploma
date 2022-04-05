@@ -1,2 +1,3 @@
 from .BusinessDomainsSerializer import BusinessDomainsSerializer
+from .TablesDropdownSerializer import TablesDropdownSerializer
 from .TablesSerializer import TablesSerializer

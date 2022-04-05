@@ -6,10 +6,12 @@ from core.models import Tables
 class TablesSerializer(serializers.ModelSerializer):
     has_children = serializers.BooleanField()
     value = serializers.IntegerField()
+    type = serializers.CharField()
 
     def to_representation(self, instance):
-        instance.value = 10
+        instance.value = 1
         instance.has_children = False
+        instance.type = "table"
         representation = super().to_representation(instance)
         return representation
 

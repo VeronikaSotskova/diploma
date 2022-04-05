@@ -8,7 +8,9 @@ circle(
   @mouseleave="hoverClass=''"
   :cx="c.x"
   :cy="c.y"
+  background-color="blue"
   @click="$emit('getChildren')"
+  :mask="c.data.type === 'table' ? 'url(#table-mask)' : ''"
 )
 </template>
 

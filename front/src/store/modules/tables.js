@@ -4,14 +4,14 @@ export default {
     namespaced: true,
 
     state: {
-        domains: {},
+        tables: [],
     },
 
     actions: {
-        getDomains: (state, params) => {
+        getTables: (state, params) => {
             return new Promise((resolve, reject) => {
-                api.get('domains/', {params: params}).then((response) => {
-                    state.commit('UPDATE_DOMAINS', response.data);
+                api.get('tables/', {params: params}).then((response) => {
+                    state.commit('UPDATE_TABLES', response.data);
                     resolve(response.data);
                 }).catch((error) => {
                     reject(error);
@@ -22,14 +22,14 @@ export default {
     },
 
     mutations: {
-        UPDATE_DOMAINS: (state, payload) => {
-            state.domains = payload;
+        UPDATE_TABLES: (state, payload) => {
+            state.tables = payload;
         },
     },
 
     getters: {
-        domains: (state) => {
-            return state.domains
+        tables: (state) => {
+            return state.tables
         },
     },
 };
