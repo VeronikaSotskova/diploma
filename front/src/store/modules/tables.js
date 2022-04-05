@@ -5,6 +5,7 @@ export default {
 
     state: {
         tables: [],
+        tableHierarchy: []
     },
 
     actions: {
@@ -17,13 +18,25 @@ export default {
                     reject(error);
                 })
             })
-
         },
+        getTableHierarchy: (state, params) => {
+            return new Promise((resolve, reject) => {
+                api.get('table_hierarchy/', {params: params}).then((response) => {
+                    state.commit('UPDATE_TABLE_HIERARCHY', response.data);
+                    resolve(response.data);
+                }).catch((error) => {
+                    reject(error);
+                })
+            })
+        }
     },
 
     mutations: {
         UPDATE_TABLES: (state, payload) => {
             state.tables = payload;
+        },
+        UPDATE_TABLE_HIERARCHY: (state, payload) => {
+            state.tableHierarchy = payload;
         },
     },
 
@@ -31,5 +44,8 @@ export default {
         tables: (state) => {
             return state.tables
         },
+        tableHierarchy: (state) => {
+            return state.tableHierarchy
+        }
     },
 };

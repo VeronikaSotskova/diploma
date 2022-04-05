@@ -17,8 +17,12 @@ nav.navbar.navbar-light.bg-light(aria-label="breadcrumb" ref="navbar_breadcrumb"
       list="items"
       v-model="searchQuery"
       @keyup="submitSearch"
+      @enter="goToSearchPage"
     )
-    button.btn.btn-outline-success.my-2.my-sm-0(type="submit") Search
+    button.btn.btn-outline-success.my-2.my-sm-0(
+      type="submit"
+      @click="goToSearchPage"
+    ) Search
     datalist#items
       option(v-for="(table, index) in tables" :value="table" :key="index")
 
@@ -119,9 +123,11 @@ export default {
       this.rootNode = this.pack(data)
     });
     this.navHeight =  this.$refs.navbar_breadcrumb.clientHeight;
-
   },
   methods: {
+    goToSearchPage() {
+      this.$router.push({path: `/search/${this.searchQuery}`});
+    },
     submitSearch() {
       return this.$store.dispatch('tables/getTables', {q: this.searchQuery})
     },

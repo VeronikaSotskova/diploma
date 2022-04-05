@@ -1,14 +1,10 @@
 <template lang="pug">
-CirclePacking
+router-view
 </template>
 
 <script>
-import CirclePacking from "@/components/CirclePacking";
 export default {
-  name: 'App',
-  components: {
-    CirclePacking
-  }
+  name: 'App'
 }
 </script>
 
