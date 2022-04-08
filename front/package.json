@@ -13,8 +13,8 @@
     "d3": "^7.4.2",
     "gitart-vue-dialog": "^2.0.5",
     "vue": "^3.0.0",
-    "vue-json-tree-view": "^2.1.6",
     "vue-router": "^4.0.0-0",
+    "vue3-treeview": "^0.3.7",
     "vuex": "^4.0.0-0"
   },
   "devDependencies": {
