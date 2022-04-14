@@ -2,7 +2,7 @@
 circle(
   :r="c.r"
   :key="key"
-  :fill="c.data.color"
+  :fill="color"
   @mouseover="hoverClass=mouseInClass()"
   :class="hoverClass"
   @mouseleave="hoverClass=''"
@@ -11,20 +11,22 @@ circle(
   background-color="blue"
   @click="$emit('getChildren')"
   :mask="c.data.type === 'table' ? 'url(#table-mask)' : ''"
+  @contextmenu.prevent="$emit('rightClick')"
 )
 </template>
 
 <script>
 export default {
   name: "Circle",
-  emits: ["getChildren"],
+  emits: ["getChildren", "rightClick"],
   props: {
     c: Object,
-    key: Number
+    key: Number,
+    color: String
   },
   data() {
     return {
-      hoverClass: ''
+      hoverClass: '',
     }
   },
   methods: {
@@ -49,4 +51,5 @@ export default {
   stroke: #f3d575;
   stroke-width: 2;
 }
+
 </style>

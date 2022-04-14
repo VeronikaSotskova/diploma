@@ -61,11 +61,27 @@ svg(preserveAspectRatio="none" :viewBox="`0 0 ${width} ${height}`")
       :key="key"
       :c="c"
       @getChildren="click(c)"
+      @rightClick="openMenu(c)"
+      @blur="closeMenu"
+      :color="c.data.color"
     )
   CircleInfo(
     v-for="(c, key) in domains.children"
     :key="key"
     :circle="c"
+  )
+div(
+  id="right-click-menu"
+  tabindex="-1"
+  v-if="viewMenu"
+  v-on:blur.prevent="closeMenu"
+  :style="{'top':top, 'left':left}"
+)
+  ColorPicker(
+    theme="light"
+    :color="colors"
+    :sucker-hide="true"
+    @changeColor="changeColor"
   )
 </template>
 
@@ -73,7 +89,8 @@ svg(preserveAspectRatio="none" :viewBox="`0 0 ${width} ${height}`")
 import {hierarchy, pack} from 'd3-hierarchy';
 import Circle from "@/components/Circle";
 import CircleInfo from "@/components/CircleInfo";
-
+import { ColorPicker } from 'vue-color-kit'
+import 'vue-color-kit/dist/vue-color-kit.css'
 
 let d3 = {
   hierarchy: hierarchy,
@@ -82,7 +99,7 @@ let d3 = {
 
 export default {
   name: "CirclePacking",
-  components: {Circle, CircleInfo},
+  components: {Circle, CircleInfo, ColorPicker},
   props: {
     margin: {
       type: Object,
@@ -101,7 +118,15 @@ export default {
       rootNode: {},
       path: [],
       navHeight: 0,
-      searchQuery: ''
+      searchQuery: '',
+      viewMenu: false,
+      top: '0px',
+      left: '0px',
+      rightClickItem: {
+        id: 0,
+        type: ''
+      },
+      colors: ''
     }
   },
   computed: {
@@ -126,18 +151,22 @@ export default {
   },
   methods: {
     goToSearchPage() {
+      this.viewMenu = false
       this.$router.push({path: `/search/${this.searchQuery}`});
     },
     submitSearch() {
+      this.viewMenu = false
       return this.$store.dispatch('tables/getTables', {q: this.searchQuery})
     },
     clickMain() {
+      this.viewMenu = false
       this.$store.dispatch("business_domains/getDomains").then((data) => {
         this.rootNode = this.pack(data)
         this.path = []
       });
     },
     click(nod) {
+      this.viewMenu = false
       if (nod.data.has_children) {
         this.$store.dispatch("business_domains/getDomains", {id: nod.data.id}).then((data) => {
           this.rootNode = this.pack(data)
@@ -146,6 +175,7 @@ export default {
       }
     },
     clickToNode(nod){
+      this.viewMenu = false
       let nodeIndexPath = this.path.indexOf(nod);
       this.$store.dispatch("business_domains/getDomains", {id: nod.id}).then((data) => {
           this.rootNode = this.pack(data)
@@ -153,6 +183,7 @@ export default {
         });
     },
     clickBehind() {
+      this.viewMenu = false
       this.path.pop()
       if (this.path.length > 0) {
         this.$store.dispatch("business_domains/getDomains", {id: this.path[this.path.length-1].id}).then((data) => {
@@ -173,6 +204,43 @@ export default {
       return d3.pack()
           .size([this.width, this.height])
           .padding(paddingCircles)(hierarchy)
+    },
+    setMenu: function (top, left) {
+
+      let largestHeight = window.innerHeight - 25;
+      let largestWidth = window.innerWidth - 25;
+
+      if (top > largestHeight) top = largestHeight;
+
+      if (left > largestWidth) left = largestWidth;
+
+      this.top = top + 'px';
+      this.left = left + 'px';
+    },
+
+    closeMenu: function () {
+      this.viewMenu = false;
+    },
+
+    openMenu(c) {
+      this.colors = c.data.color
+      this.viewMenu = true;
+      this.setMenu(event.pageY, event.pageX)
+      event.preventDefault();
+      this.rightClickItem.id = c.data.id
+      this.rightClickItem.type = c.data.type
+    },
+
+    changeColor(color) {
+      this.colors = color
+      let pos = this.domains.children.findIndex(
+          el => `${el.data.type}_${el.data.id}` === `${this.rightClickItem.type}_${this.rightClickItem.id}`
+      )
+      this.domains.children[pos].data.color = this.colors.hex
+      this.$store.dispatch(
+          "business_domains/changeColor",
+          {type: this.rightClickItem.type, id: this.rightClickItem.id, color: this.colors.hex}
+      )
     }
   }
 }
@@ -193,5 +261,33 @@ circle {
 }
 .mainCircle {
   fill-opacity: .5;
+}
+
+#right-click-menu {
+  background: #FAFAFA;
+  border: 1px solid #BDBDBD;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
+  display: block;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  width: 250px;
+  z-index: 999999;
+}
+
+#right-click-menu li {
+  border-bottom: 1px solid #E0E0E0;
+  margin: 0;
+  padding: 5px 35px;
+}
+
+#right-click-menu li:last-child {
+  border-bottom: none;
+}
+
+#right-click-menu li:hover {
+  background: #1E88E5;
+  color: #FAFAFA;
 }
 </style>

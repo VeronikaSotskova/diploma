@@ -69,3 +69,13 @@ class BusinessDomainsViewSet(viewsets.ViewSet):
 
         return Response({"nodes": res, "config": {"roots": config_root}})
 
+    @action(detail=False, methods=['get'])
+    def change_color(self, request, *args, **kwargs):
+        t = request.GET.get('type')
+        id_t = request.GET.get('id')
+        color = request.GET.get('color')
+        model = BusinessDomains if t == 'domain' else Tables
+        model.objects.filter(id=int(id_t)).update(color=color)
+        return Response("OK")
+
+
