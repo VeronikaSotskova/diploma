@@ -19,6 +19,11 @@ class Tables(models.Model):
         null=True,
         blank=True
     )
+    tags = models.ManyToManyField(
+        to="core.Tags",
+        related_name="tables",
+        related_query_name="tables"
+    )
 
     def __str__(self):
         return self.name

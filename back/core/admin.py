@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.forms import ModelForm, TextInput, ModelMultipleChoiceField
 from easy_select2 import Select2Multiple
 
-from .models import BusinessDomains, Tables
+from .models import BusinessDomains, Tables, Tags, TagsType
 
 
 class BusinessDomainsForm(ModelForm):
@@ -22,6 +22,9 @@ class BusinessDomainsForm(ModelForm):
             'tables': Select2Multiple(
                 select2attrs={'width': '300px'}
             ),
+            'tags': Select2Multiple(
+                select2attrs={'width': '300px'}
+            ),
         }
 
 
@@ -36,17 +39,64 @@ class BusinessDomainsAdmin(admin.ModelAdmin):
 
 
 class TablesForm(ModelForm):
+    tag = Tags.objects.all()
+    tags = ModelMultipleChoiceField(
+        queryset=tag,
+        widget=Select2Multiple(select2attrs={'width': '300px'}),
+        blank=True,
+        required=False,
+    )
+
     class Meta:
         model = Tables
         fields = '__all__'
         widgets = {
             'color': TextInput(attrs={'type': 'color'}),
+            'tags': Select2Multiple(
+                select2attrs={'width': '300px'}
+            ),
         }
 
 
 @admin.register(Tables)
 class TablesAdmin(admin.ModelAdmin):
     form = TablesForm
+    list_display = ('id', 'name', 'color',)
+    list_editable = ('name', 'color')
+    search_fields = ('^name',)
+    save_on_top = True
+
+
+class TagsForm(ModelForm):
+    class Meta:
+        model = Tags
+        fields = '__all__'
+        widgets = {
+            'color': TextInput(attrs={'type': 'color'}),
+        }
+
+
+@admin.register(Tags)
+class TagsAdmin(admin.ModelAdmin):
+    form = TagsForm
+    list_display = ('id', 'name', 'color',)
+    list_editable = ('name', 'color')
+    search_fields = ('^name',)
+    save_on_top = True
+
+
+class TagsTypeForm(ModelForm):
+    class Meta:
+        model = TagsType
+        fields = '__all__'
+        widgets = {
+            'color': TextInput(attrs={'type': 'color'}),
+        }
+
+
+@admin.register(TagsType)
+class TagsTypeAdmin(admin.ModelAdmin):
+    form = TagsTypeForm
     list_display = ('id', 'name', 'color',)
     list_editable = ('name', 'color')
     search_fields = ('^name',)

@@ -1,9 +1,11 @@
+from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from core.enums import ModelTypeEnum
 from core.models import BusinessDomains, Tables
-from core.serializers import BusinessDomainsSerializer, TablesSerializer
+from core.serializers import BusinessDomainsSerializer, TablesSerializer, PaginationSerializer
 from core.serializers.BusinessDomainsSerializer import ParentSerializer
 
 
@@ -29,53 +31,50 @@ class BusinessDomainsViewSet(viewsets.ViewSet):
         )
 
     @action(detail=False, methods=['get'])
-    def tables(self, request, *args, **kwargs):
+    def hint_objects(self, request, *args, **kwargs):
         params = request.GET
-        if "q" in params:
+        if "q" in params and params.get("q", None) != "":
             tables = Tables.objects.filter(name__istartswith=params["q"]).values_list("name", flat=True)
-            return Response(list(tables))
+            domains = BusinessDomains.objects.filter(name__istartswith=params["q"]).values_list("name", flat=True)
+            return Response(list(tables) + list(domains))
         else:
             return Response([])
-
-    @action(detail=False, methods=['get'])
-    def table_hierarchy(self, request, *args, **kwargs):
-        name = request.GET.get("name", None)
-        config_root = []
-        res = {}
-        if name is not None and str(name).strip() != "":
-            tables = Tables.objects.filter(name__istartswith=name)
-            config_root = [f"table_{t_id}" for t_id in list(tables.values_list("id", flat=True))]
-            for table in tables:
-                domain_ids = table.tables_in_domains.values_list("business_domain", flat=True)
-                business_domains = BusinessDomains.objects.filter(id__in=domain_ids)
-                res[f"table_{table.id}"] = {
-                    "text": table.name,
-                    "children": [f"domain_{d_id}" for d_id in list(business_domains.values_list("id", flat=True))]
-                }
-                for domain in business_domains:
-                    res[f"domain_{domain.id}"] = {
-                        "text": domain.name,
-                    }
-                    if domain.parent:
-                        res[f"domain_{domain.id}"]["children"] = [f"domain_{domain.parent.id}",]
-                    current_domain = domain
-                    while current_domain.parent:
-                        current_domain = current_domain.parent
-                        res[f"domain_{current_domain.id}"] = {
-                            "text": current_domain.name,
-                        }
-                        if current_domain.parent:
-                            res[f"domain_{current_domain.id}"]["children"] = [f"domain_{current_domain.parent.id}",]
-
-        return Response({"nodes": res, "config": {"roots": config_root}})
 
     @action(detail=False, methods=['get'])
     def change_color(self, request, *args, **kwargs):
         t = request.GET.get('type')
         id_t = request.GET.get('id')
         color = request.GET.get('color')
-        model = BusinessDomains if t == 'domain' else Tables
+        model = ModelTypeEnum[t].model
         model.objects.filter(id=int(id_t)).update(color=color)
         return Response("OK")
 
+    @action(detail=False, methods=['get'])
+    def search(self, request, *args, **kwargs):
+        params = request.GET
+        query = Q()
 
+        paginator_domain = PaginationSerializer()
+        paginator_table = PaginationSerializer()
+
+        paginator_domain.page_query_param = 'page_domain'
+        paginator_table.page_query_param = 'page_table'
+
+        if "name" in params and params["name"] not in [None, ""]:
+            query.add(Q(name__istartswith=params["name"]), Q.AND)
+        if "tags" in params and params["tags"] not in [None, ""]:
+            tags_list_id = list(map(int, params["tags"].split(",")))
+            query.add(Q(tags__in=tags_list_id), Q.AND)
+        search_domains = BusinessDomains.objects.filter(query).distinct().order_by("name")
+        search_tables = Tables.objects.filter(query).distinct().order_by("name")
+
+        result_page_domains = paginator_domain.paginate_queryset(search_domains, request)
+        result_page_tables = paginator_table.paginate_queryset(search_tables, request)
+
+        domains_response = BusinessDomainsSerializer(result_page_domains, many=True, context={"request": request}).data
+        tables_response = TablesSerializer(result_page_tables, many=True, context={"request": request}).data
+
+        return Response({
+            "domain": paginator_domain.get_paginated_response(domains_response),
+            "table": paginator_table.get_paginated_response(tables_response)
+        })

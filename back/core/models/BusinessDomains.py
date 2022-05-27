@@ -34,6 +34,12 @@ class BusinessDomains(models.Model):
         related_query_name="children",
         db_column="parent_id"
     )
+    tags = models.ManyToManyField(
+        to="core.Tags",
+        related_name="domains",
+        related_query_name="domains",
+        blank=True
+    )
 
     def __str__(self):
         return self.name

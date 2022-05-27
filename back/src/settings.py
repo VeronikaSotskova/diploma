@@ -10,9 +10,9 @@ env.read_env(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = env('SECRET_KEY')
 
-DEBUG = bool(int(env("DEBUG")))
+DEBUG = env.bool("DEBUG", True)
 
-ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(";")
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 DJANGO_APPS = (
     'django.contrib.admin',
@@ -27,6 +27,7 @@ THIRD_PARTY_APPS = (
     'rest_framework',
     'corsheaders',
     'easy_select2',
+    'django_filters',
 )
 
 LOCAL_APPS = (
@@ -110,5 +111,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS settings
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
-CORS_WHITELIST_ORIGINS = env('CORS_ORIGIN_WHITELIST').split(';')
-CORS_ORIGIN_REGEX_WHITELIST = env('CORS_ORIGIN_REGEX_WHITELIST').split(';')
+CORS_WHITELIST_ORIGINS = env.list('CORS_ORIGIN_WHITELIST')
+CORS_ORIGIN_REGEX_WHITELIST = env.list('CORS_ORIGIN_REGEX_WHITELIST')
+
+# DBT
+if DEBUG:
+    DBT_PROJECT_PATH = os.path.join(BASE_DIR, env.path('DBT_PROJECT_PATH'))
+else:
+    DBT_PROJECT_PATH = env.path('DBT_PROJECT_PATH')
