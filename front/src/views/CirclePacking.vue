@@ -1,46 +1,50 @@
 <template lang="pug">
-nav.navbar.navbar-light.bg-light(aria-label="breadcrumb" ref="navbar_breadcrumb")
-  ol(class="breadcrumb")
-    li(class="breadcrumb-item" :class="[path.length > 0 ? '' : 'active']" @click="clickMain") Root
-    li(
-      v-for="pathNode in path"
-      :key="pathNode.id"
-      class="breadcrumb-item"
-      :class="[pathNode.id === path[path.length-1].id ? 'active' : '']"
-      @click="clickToNode(pathNode)"
-    ) {{ pathNode.text }}
-  form.form-inline
-    input.form-control.mr-sm-2(
-      type="search"
-      placeholder="Search"
-      aria-label="Search"
-      list="items"
-      v-model="searchQuery"
-      @keyup="submitSearch"
-      @enter="goToSearchPage"
-    )
-    button.btn.btn-outline-success.my-2.my-sm-0(
-      type="submit"
-      @click="goToSearchPage"
-    ) Search
-    datalist#items
-      option(v-for="(table, index) in tables" :value="table" :key="index")
+nav.navbar.navbar-expand(
+  aria-label="breadcrumb"
+  ref="navbar_breadcrumb"
+  @click="viewMenu=false"
+)
+  Breadcrumb(:path="path" @clickToNode="clickToNode" @clickMain="clickMain")
+  .collapse.navbar-collapse(style="justify-content: flex-end;")
+    ul.navbar-nav
+      li.nav-item.dropdown
+        a.nav-link.dropdown-toggle.btn.btn-success#dropdownMenuLink(
+          role="button"
+          href="#"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
+        ) Menu
+        .dropdown-menu(aria-labelledby="dropdownMenuLink" style="left: auto; right: 5px;")
+          router-link.dropdown-item(to="/search") Go to Search Page
+  //.dropdown
+  //  a.bth.btn-success.dropdown-toggle#dropdownMenuLink(
+  //    href="#"
+  //    role="button"
+  //    data-toggle="dropdown"
+  //    aria-haspopup="true"
+  //    aria-expanded="false"
+  //  ) Menu
+  //  .dropdown-menu(aria-labelledby="dropdownMenuLink")
+  //    router-link.dropdown-item(to="/tag_cloud") Go to Tag Cloud
+  //    router-link.dropdown-item(to="/search") Go to Search Page
 
+DialogWindow(@closeWindow="dialogState=false" :dialogState="dialogState" :dialogCircle="dialogCircle")
 
-svg(preserveAspectRatio="none" :viewBox="`0 0 ${width} ${height}`")
+svg(preserveAspectRatio="none" :viewBox="`0 -10 ${width} ${height}`" @click="viewMenu=false")
   defs
     pattern(
       id="table-pattern"
       patternUnits="userSpaceOnUse"
-      width="40"
-      height="40"
+      width="50"
+      height="50"
     )
       image(
-        xlink:href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc1JyBoZWlnaHQ9JzUnPgogIDxyZWN0IHdpZHRoPSc1JyBoZWlnaHQ9JzUnIGZpbGw9J3doaXRlJy8+CiAgPHBhdGggZD0nTTAgNUw1IDBaTTYgNEw0IDZaTS0xIDFMMSAtMVonIHN0cm9rZT0nIzg4OCcgc3Ryb2tlLXdpZHRoPScxJy8+Cjwvc3ZnPg=="
+        xlink:href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCc+CiAgPHJlY3Qgd2lkdGg9JzEwJyBoZWlnaHQ9JzEwJyBmaWxsPSd3aGl0ZScgLz4KICA8cmVjdCB4PScwJyB5PScwJyB3aWR0aD0nMTAnIGhlaWdodD0nMScgZmlsbD0nYmxhY2snIC8+Cjwvc3ZnPg=="
         x="0"
         y="0"
-        width="40"
-        height="40"
+        width="50"
+        height="50"
       )
     mask(id="table-mask" x="0" y="0" width="1" height="1")
       rect(x="0" y="0" width="100%" height="100%" fill="url(#table-pattern)")
@@ -62,33 +66,31 @@ svg(preserveAspectRatio="none" :viewBox="`0 0 ${width} ${height}`")
       :c="c"
       @getChildren="click(c)"
       @rightClick="openMenu(c)"
-      @blur="closeMenu"
+      @showDialog="dialogState=true; dialogCircle=c"
       :color="c.data.color"
     )
-  CircleInfo(
-    v-for="(c, key) in domains.children"
-    :key="key"
-    :circle="c"
-  )
-div(
-  id="right-click-menu"
+ColorPicker(
+  style="display: block;margin: 0;position: absolute; z-index: 999999;"
   tabindex="-1"
   v-if="viewMenu"
+  theme="light"
+  :color="colors"
+  :sucker-hide="true"
+  :sucker-canvas="suckerCanvas"
+  :sucker-area="suckerArea"
+  @changeColor="changeColor"
   v-on:blur.prevent="closeMenu"
   :style="{'top':top, 'left':left}"
+  ref="colorPickerForm"
 )
-  ColorPicker(
-    theme="light"
-    :color="colors"
-    :sucker-hide="true"
-    @changeColor="changeColor"
-  )
+
 </template>
 
 <script>
 import {hierarchy, pack} from 'd3-hierarchy';
+import Breadcrumb from "@/components/Breadcrumb";
 import Circle from "@/components/Circle";
-import CircleInfo from "@/components/CircleInfo";
+import DialogWindow from "@/components/DialogWindow";
 import { ColorPicker } from 'vue-color-kit'
 import 'vue-color-kit/dist/vue-color-kit.css'
 
@@ -99,7 +101,7 @@ let d3 = {
 
 export default {
   name: "CirclePacking",
-  components: {Circle, CircleInfo, ColorPicker},
+  components: {Circle, ColorPicker, Breadcrumb, DialogWindow},
   props: {
     margin: {
       type: Object,
@@ -118,7 +120,6 @@ export default {
       rootNode: {},
       path: [],
       navHeight: 0,
-      searchQuery: '',
       viewMenu: false,
       top: '0px',
       left: '0px',
@@ -126,7 +127,11 @@ export default {
         id: 0,
         type: ''
       },
-      colors: ''
+      colors: '',
+      suckerCanvas: null,
+      suckerArea: [],
+      dialogState: false,
+      dialogCircle: {}
     }
   },
   computed: {
@@ -138,9 +143,6 @@ export default {
     },
     height() {
       return document.documentElement.clientHeight - this.margin.top - this.margin.bottom - this.navHeight;
-    },
-    tables() {
-      return this.$store.getters["tables/tables"]
     }
   },
   mounted() {
@@ -150,14 +152,6 @@ export default {
     this.navHeight =  this.$refs.navbar_breadcrumb.clientHeight;
   },
   methods: {
-    goToSearchPage() {
-      this.viewMenu = false
-      this.$router.push({path: `/search/${this.searchQuery}`});
-    },
-    submitSearch() {
-      this.viewMenu = false
-      return this.$store.dispatch('tables/getTables', {q: this.searchQuery})
-    },
     clickMain() {
       this.viewMenu = false
       this.$store.dispatch("business_domains/getDomains").then((data) => {
@@ -202,7 +196,7 @@ export default {
           .sum((d) => d.value)
           .sort((a, b) => b.value - a.value)
       return d3.pack()
-          .size([this.width, this.height])
+          .size([this.width, this.height-11])
           .padding(paddingCircles)(hierarchy)
     },
     setMenu: function (top, left) {
@@ -226,9 +220,9 @@ export default {
       this.colors = c.data.color
       this.viewMenu = true;
       this.setMenu(event.pageY, event.pageX)
-      event.preventDefault();
       this.rightClickItem.id = c.data.id
       this.rightClickItem.type = c.data.type
+      this.$refs.colorPickerForm.$el.focus = true
     },
 
     changeColor(color) {
@@ -247,47 +241,8 @@ export default {
 </script>
 
 <style scoped>
-circle {
-  transition: 0.4s linear;
-}
-.breadcrumb-item {
-  font-weight: 500;
-}
-.breadcrumb-item:hover {
-  font-weight: 700;
-}
-.breadcrumb {
-  margin-bottom: 5px;
-}
+
 .mainCircle {
   fill-opacity: .5;
-}
-
-#right-click-menu {
-  background: #FAFAFA;
-  border: 1px solid #BDBDBD;
-  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
-  display: block;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  position: absolute;
-  width: 250px;
-  z-index: 999999;
-}
-
-#right-click-menu li {
-  border-bottom: 1px solid #E0E0E0;
-  margin: 0;
-  padding: 5px 35px;
-}
-
-#right-click-menu li:last-child {
-  border-bottom: none;
-}
-
-#right-click-menu li:hover {
-  background: #1E88E5;
-  color: #FAFAFA;
 }
 </style>

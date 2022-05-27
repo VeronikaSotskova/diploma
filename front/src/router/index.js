@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import CirclePacking from "../views/CirclePacking";
-import TableTreeSearch from "../views/TableTreeSearch";
+import SearchPage from "../views/SearchPage";
+import ModelPage from "../views/ModelPage";
 
 const routes = [
   {
@@ -9,10 +10,15 @@ const routes = [
     component: CirclePacking
   },
   {
-    path: '/search/:searchText',
-    name: 'Search',
-    component: TableTreeSearch
-  }
+    path: '/search',
+    name: 'SearchPage',
+    component: SearchPage
+  },
+  {
+    path: '/model',
+    name: 'ModelPage',
+    component: ModelPage
+  },
 ]
 
 const router = createRouter({

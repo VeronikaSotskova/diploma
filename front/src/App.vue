@@ -52,4 +52,7 @@ export default {
   text-align: center;
   color: #2c3e50;
 }
+.navbar {
+  background-color: #e6e6fa
+}
 </style>
