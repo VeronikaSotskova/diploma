@@ -22,17 +22,16 @@ NavBar(:currentPage="'search'" :title="'Поиск'")
             b Выбор тэгов:
             MultiSelectTags#select-tags(
               v-model="tagsInput"
-              :tagsFunc="async function(query) { return await $store.dispatch('tags/getTags',{name: query, min: 10})}"
+              :tagsFunc="async function(query) { return await getTags({name: query, min: 10})}"
             )
           .form-group
-            label(for="search-input") Поиск:
+            b Название:
             input.form-control.mr-sm-2#search-input(
               type="search"
-              placeholder="Search table"
+              placeholder="Введите название"
               aria-label="Search"
               list="items"
               v-model="searchQuery"
-              @keyup.prevent="submitSearch({q:searchQuery})"
             )
             datalist#items
               option(v-for="(obj, index) in hintObjects" :value="obj" :key="index")
@@ -42,7 +41,7 @@ NavBar(:currentPage="'search'" :title="'Поиск'")
     .col
       .results(v-if="searchResult[selectType] && searchResult[selectType].results && searchResult[selectType].results.length && searchResult[selectType].results.length > 0")
         p(v-html="`Общее количество: <b>${searchResult[selectType].count}</b>`")
-        ObjectCard(v-for="(o, index) in searchResult[selectType].results" :key="`${o.type}-${o.id}`" :obj="o")
+        ObjectCard(v-for="o in searchResult[selectType].results" :key="`${o.type}-${o.id}`" :obj="o")
         nav
           ul.pagination.justify-content-center
             li.page-item.mr-2(v-if="searchResult[selectType].prev_page")
@@ -59,6 +58,8 @@ import { mapActions, mapGetters } from 'vuex'
 import NavBar from "@/components/NavBar";
 import ObjectCard from "@/components/ObjectCard";
 import MultiSelectTags from "@/components/MultiSelectTags";
+import axios from 'axios'
+import {api} from "../store/api";
 
 export default {
   name: "SearchPage",
@@ -69,7 +70,8 @@ export default {
       tagsInput: [],
       selectType: 'table',
       domainPage: 1,
-      tablePage: 1
+      tablePage: 1,
+      requestName: null
     }
   },
 
@@ -89,8 +91,24 @@ export default {
   methods: {
     ...mapActions({
       submitSearch: ('search/getHintObjects'),
-      getSearchResult: ('search/getSearchObjects')
+      getSearchResult: ('search/getSearchObjects'),
+      getTags: ('tags/getTags')
     }),
+    async hint() {
+      this.cancelRequestName()
+      const source = axios.CancelToken.source()
+      this.requestName = { cancel: source.cancel }
+
+      await api.get('hint_objects/', {
+        params: {
+          q: this.searchQuery
+        },
+        cancelToken: source.token
+      }).then((response) => {
+        this.$store.commit('search/UPDATE_HINT_OBJECTS', response.data)
+        this.requestName = null
+      }).catch(() => {})
+    },
     nextPage() {
       if (this.selectType === 'table') {
         this.tablePage += 1
@@ -116,21 +134,19 @@ export default {
       this.tablePage = 1
       this.domainPage = 1
       this.search()
+    },
+    cancelRequestName() {
+      if (this.requestName) {
+        this.requestName.cancel()
+      }
     }
-    // submitSearch() {
-    //   // {q: this.searchQuery}
-    //   return this.$store.dispatch('search/getHintObjects', {q: this.searchQuery})
-    // }
   },
   mounted() {
     this.updateSearch()
   },
   watch: {
-    tagsInput() {
-      this.updateSearch()
-    },
     searchQuery() {
-      this.updateSearch()
+      this.hint()
     }
   }
 }

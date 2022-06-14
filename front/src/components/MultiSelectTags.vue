@@ -32,11 +32,6 @@ export default {
   components: {
     Multiselect
   },
-  // data() {
-  //   return {
-  //     selectTag: null,
-  //   }
-  // },
   props: {
     value: {
       type: Array,

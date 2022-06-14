@@ -40,11 +40,11 @@ class BusinessDomainsViewSet(viewsets.ViewSet):
         else:
             return Response([])
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['patch'])
     def change_color(self, request, *args, **kwargs):
-        t = request.GET.get('type')
-        id_t = request.GET.get('id')
-        color = request.GET.get('color')
+        t = request.data.get('type')
+        id_t = request.data.get('id')
+        color = request.data.get('color')
         model = ModelTypeEnum[t].model
         model.objects.filter(id=int(id_t)).update(color=color)
         return Response("OK")

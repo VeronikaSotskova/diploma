@@ -68,10 +68,6 @@ export default {
         this.update()
       }
     },
-    // tags() {
-    //   this.start();
-    //   this.setSpeed(this.speed);
-    // },
     shape() {
       this.start();
       this.setSpeed(this.speed);

@@ -20,7 +20,7 @@ export default {
         },
         changeColor: (state, params) => {
             return new Promise((resolve, reject) => {
-                api.get('change_color/', {params: params}).then((response) => {
+                api.patch('change_color/', params).then((response) => {
                     resolve(response.data);
                 }).catch((error) => {
                     reject(error);

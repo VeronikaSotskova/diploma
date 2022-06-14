@@ -4,26 +4,13 @@ export default {
     namespaced: true,
 
     state: {
-        tableHierarchyConfig: {},
-        tableHierarchyNodes: {},
         hintObjects: [],
         searchObjects: {}
     },
 
     actions: {
-        getTableHierarchy: (state, params) => {
-            return new Promise((resolve, reject) => {
-                api.get('hint_objects/', {params: params}).then((response) => {
-                    state.commit('UPDATE_TABLE_HIERARCHY_CONFIG', response.data.config);
-                    state.commit('UPDATE_TABLE_HIERARCHY_NODES', response.data.nodes);
-                    resolve(response.data);
-                }).catch((error) => {
-                    reject(error);
-                })
-            })
-        },
-        async getHintObjects({ commit }, params) {
-            const response = await api.get('hint_objects/', {params: params})
+        async getHintObjects({ commit }, params, cancelToken) {
+            const response = await api.get('hint_objects/', {params: params, cancelToken})
             await commit('UPDATE_HINT_OBJECTS', response.data)
         },
         async getSearchObjects({ commit }, params) {
@@ -33,12 +20,6 @@ export default {
     },
 
     mutations: {
-        UPDATE_TABLE_HIERARCHY_CONFIG: (state, payload) => {
-            state.tableHierarchyConfig = payload;
-        },
-        UPDATE_TABLE_HIERARCHY_NODES: (state, payload) => {
-            state.tableHierarchyNodes = payload;
-        },
         UPDATE_HINT_OBJECTS: (state, payload) => {
             state.hintObjects = payload;
         },
@@ -48,8 +29,6 @@ export default {
     },
 
     getters: {
-        tableHierarchyConfig: state => state.tableHierarchyConfig,
-        tableHierarchyNodes: state => state.tableHierarchyNodes,
         hintObjects: state => state.hintObjects,
         searchObjects: state => state.searchObjects
     },

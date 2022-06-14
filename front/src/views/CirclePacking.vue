@@ -1,33 +1,12 @@
 <template lang="pug">
-nav.navbar.navbar-expand(
+nav.nav.navbar(
   aria-label="breadcrumb"
   ref="navbar_breadcrumb"
   @click="viewMenu=false"
 )
   Breadcrumb(:path="path" @clickToNode="clickToNode" @clickMain="clickMain")
-  .collapse.navbar-collapse(style="justify-content: flex-end;")
-    ul.navbar-nav
-      li.nav-item.dropdown
-        a.nav-link.dropdown-toggle.btn.btn-success#dropdownMenuLink(
-          role="button"
-          href="#"
-          data-toggle="dropdown"
-          aria-haspopup="true"
-          aria-expanded="false"
-        ) Menu
-        .dropdown-menu(aria-labelledby="dropdownMenuLink" style="left: auto; right: 5px;")
-          router-link.dropdown-item(to="/search") Go to Search Page
-  //.dropdown
-  //  a.bth.btn-success.dropdown-toggle#dropdownMenuLink(
-  //    href="#"
-  //    role="button"
-  //    data-toggle="dropdown"
-  //    aria-haspopup="true"
-  //    aria-expanded="false"
-  //  ) Menu
-  //  .dropdown-menu(aria-labelledby="dropdownMenuLink")
-  //    router-link.dropdown-item(to="/tag_cloud") Go to Tag Cloud
-  //    router-link.dropdown-item(to="/search") Go to Search Page
+  .btn-group.align-items-end
+    router-link.btn.btn-success(to="/search" ) Страница поиска
 
 DialogWindow(@closeWindow="dialogState=false" :dialogState="dialogState" :dialogCircle="dialogCircle")
 
@@ -92,6 +71,7 @@ import Breadcrumb from "@/components/Breadcrumb";
 import Circle from "@/components/Circle";
 import DialogWindow from "@/components/DialogWindow";
 import { ColorPicker } from 'vue-color-kit'
+import {mapActions, mapGetters} from 'vuex'
 import 'vue-color-kit/dist/vue-color-kit.css'
 
 let d3 = {
@@ -102,6 +82,7 @@ let d3 = {
 export default {
   name: "CirclePacking",
   components: {Circle, ColorPicker, Breadcrumb, DialogWindow},
+
   props: {
     margin: {
       type: Object,
@@ -115,6 +96,7 @@ export default {
       }
     }
   },
+
   data() {
     return {
       rootNode: {},
@@ -134,9 +116,13 @@ export default {
       dialogCircle: {}
     }
   },
+
   computed: {
+    ...mapGetters({
+      business_domains: 'business_domains/domains',
+    }),
     domains() {
-      return this.pack(this.$store.getters["business_domains/domains"])
+      return this.pack(this.business_domains)
     },
     width() {
       return document.documentElement.clientWidth - this.margin.right - this.margin.left;
@@ -145,16 +131,22 @@ export default {
       return document.documentElement.clientHeight - this.margin.top - this.margin.bottom - this.navHeight;
     }
   },
+
   mounted() {
-    this.$store.dispatch("business_domains/getDomains").then((data) => {
+    this.getDomains().then((data) => {
       this.rootNode = this.pack(data)
     });
     this.navHeight =  this.$refs.navbar_breadcrumb.clientHeight;
   },
+
   methods: {
+    ...mapActions({
+      getDomains: ('business_domains/getDomains'),
+      changeDomainColor: ('business_domains/changeColor')
+    }),
     clickMain() {
       this.viewMenu = false
-      this.$store.dispatch("business_domains/getDomains").then((data) => {
+      this.getDomains().then((data) => {
         this.rootNode = this.pack(data)
         this.path = []
       });
@@ -162,7 +154,7 @@ export default {
     click(nod) {
       this.viewMenu = false
       if (nod.data.has_children) {
-        this.$store.dispatch("business_domains/getDomains", {id: nod.data.id}).then((data) => {
+        this.getDomains({id: nod.data.id}).then((data) => {
           this.rootNode = this.pack(data)
           this.path.push({text: this.rootNode.data.name, id: this.rootNode.data.id})
         });
@@ -171,7 +163,7 @@ export default {
     clickToNode(nod){
       this.viewMenu = false
       let nodeIndexPath = this.path.indexOf(nod);
-      this.$store.dispatch("business_domains/getDomains", {id: nod.id}).then((data) => {
+      this.getDomains({id: nod.id}).then((data) => {
           this.rootNode = this.pack(data)
           this.path = this.path.slice(0, nodeIndexPath+1)
         });
@@ -180,11 +172,11 @@ export default {
       this.viewMenu = false
       this.path.pop()
       if (this.path.length > 0) {
-        this.$store.dispatch("business_domains/getDomains", {id: this.path[this.path.length-1].id}).then((data) => {
+        this.getDomains({id: this.path[this.path.length-1].id}).then((data) => {
           this.rootNode = this.pack(data)
         });
       } else {
-        this.$store.dispatch("business_domains/getDomains").then((data) => {
+        this.getDomains().then((data) => {
           this.rootNode = this.pack(data)
         });
       }
@@ -199,23 +191,19 @@ export default {
           .size([this.width, this.height-11])
           .padding(paddingCircles)(hierarchy)
     },
-    setMenu: function (top, left) {
-
+    setMenu(top, left) {
       let largestHeight = window.innerHeight - 25;
       let largestWidth = window.innerWidth - 25;
 
       if (top > largestHeight) top = largestHeight;
-
       if (left > largestWidth) left = largestWidth;
 
       this.top = top + 'px';
       this.left = left + 'px';
     },
-
-    closeMenu: function () {
+    closeMenu() {
       this.viewMenu = false;
     },
-
     openMenu(c) {
       this.colors = c.data.color
       this.viewMenu = true;
@@ -224,15 +212,13 @@ export default {
       this.rightClickItem.type = c.data.type
       this.$refs.colorPickerForm.$el.focus = true
     },
-
     changeColor(color) {
       this.colors = color
       let pos = this.domains.children.findIndex(
           el => `${el.data.type}_${el.data.id}` === `${this.rightClickItem.type}_${this.rightClickItem.id}`
       )
       this.domains.children[pos].data.color = this.colors.hex
-      this.$store.dispatch(
-          "business_domains/changeColor",
+      this.changeDomainColor(
           {type: this.rightClickItem.type, id: this.rightClickItem.id, color: this.colors.hex}
       )
     }

@@ -24,6 +24,7 @@ NavBar(:currentPage="'model_page'" :title="entity.name")
           v-model="selectTags"
           :tagsFunc="async function (query) {return await getTagsForObject({name:query})}"
         )
+        br
         button.btn.btn-primary(
           @click="appendTags"
         ) Сохранить
@@ -52,9 +53,9 @@ GDialog(v-model="dialogState" max-width="500px" scrollable)
         :event-handlers="eventHandlers"
         :selectedNodes="[currentNode,]"
       )
-      p(v-else) Not Found in DBT
+      p(v-else) Не найдено в DBT витрине
     .actions.max
-      button(class="btn btn-outline-dark" @click="dialogState=false") Close
+      button(class="btn btn-outline-dark" @click="dialogState=false") Закрыть
 .fab
   button.btn.btn-primary.btn-lg(@click="dialogState=true") DBT
 </template>
@@ -123,12 +124,6 @@ export default {
           },
         }
       },
-      eventHandlers: {
-        "node:click": ({node}) => {
-          // toggle
-          console.log(node)
-        },
-      },
       options: {shape: 'sphere', lock: '', speed: [baseSpeed, baseSpeed]},
       dialogState: false,
       selectTags: [],
@@ -142,11 +137,7 @@ export default {
       addTags: ('dbt/addTags')
     }),
     appendTags() {
-      this.addTags({type:this.entity.type, id:this.entity.id, tags_id:this.selectTags + ''}).then(
-          () => {
-            console.log('added tags', this.tags)
-          }
-      )
+      this.addTags({type:this.entity.type, id:this.entity.id, tags_id:this.selectTags + ''})
       this.getTagsForObject({type:this.entity.type, id:this.entity.id})
     }
   },

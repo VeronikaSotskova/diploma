@@ -4,10 +4,6 @@ GDialog(v-model="dialogState" max-width="500px" scrollable)
     .content
       .title(@click="goToModelPage") {{ dialogCircle.data.name }}
       .tags(style="margin-bottom: 20px;" v-if="dialogCircle.data.tags")
-        //CustomMultiSelect.badge.badge-pill(
-        //  :objectType="dialogCircle.data.type"
-        //  :objectId="dialogCircle.data.id"
-        //)
         a.badge.badge-pill(
           v-for="tag in dialogCircle.data.tags"
           :key="tag.id"
@@ -17,7 +13,7 @@ GDialog(v-model="dialogState" max-width="500px" scrollable)
         ) {{ tag.text }}
       p {{ dialogCircle.data.description || dialogCircle.data.business_name }}
     .actions.max
-      button(class="btn btn-outline-dark" @click="$emit('closeWindow')") Close
+      button(class="btn btn-outline-dark" @click="$emit('closeWindow')") Закрыть
 </template>
 
 <script>

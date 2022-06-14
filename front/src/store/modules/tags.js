@@ -37,9 +37,6 @@ export default {
         },
         UPDATE_TAGS_FOR_OBJECT: (state, payload) => {
             state.tagsForObject = payload;
-        },
-        APPEND_TAGS: (state, payload) => {
-            state.tagsForObject.push(...payload)
         }
     },
 
